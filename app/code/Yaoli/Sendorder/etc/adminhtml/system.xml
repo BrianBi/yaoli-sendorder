@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="sendorder" translate="label" sortOrder="1000">
+            <label>Yaoli Packge</label>
+        </tab>
+        <section id="sendorder" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Sendorder</label>
+            <tab>sendorder</tab>
+            <resource>Yaoli_Sendorder::quenelist</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Sendorder Configuration</label>
+                <field id="enable" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sendorder Enable</label>
+                    <comment>Enable OR Disable SendOrder</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="webid" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Web Id</label>
+                </field>
+
+                <field id="channel" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Channel</label>
+                </field>
+
+                <field id="job_timeout" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximal Job Timeout</label>
+                </field>
+
+                <field id="routingkey" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Routing Key</label>
+                </field>
+
+                <field id="quenue_name" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Quenue Name</label>
+                </field>
+            </group>
+
+            <group id="connection" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>AMQP Configuration</label>
+                <field id="host" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>AMQP HostPath</label>
+                </field>
+
+                <field id="port" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>AMQP Host Port</label>
+                </field>
+
+                <field id="vhost" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>AMQP VHost</label>
+                </field>
+
+                <field id="user" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>AMQP Username</label>
+                </field>
+
+                <field id="password" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>AMQ Password</label>
+                </field>
+
+                <field id="login" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>AMQ Login</label>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

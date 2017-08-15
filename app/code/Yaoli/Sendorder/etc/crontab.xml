@@ -1,0 +1,7 @@
+<config>
+    <group id="yaoli_sendorder">
+        <job name="order_sync_to_oa" instance="Yaoli\Sendorder\Cron\SyncOrderToAmqp" method="execute">
+            <schedule>*/1 * * * *</schedule>
+        </job>
+    </group>
+</config>

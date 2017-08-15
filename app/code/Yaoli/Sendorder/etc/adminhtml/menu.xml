@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Yaoli_Sendorder::quenelist_head" title="SendOrder" module="Yaoli_Sendorder" sortOrder="100" parent="Magento_Backend::stores" resource="Yaoli_Sendorder::quenelist_head" />
+        <add id="Yaoli_Sendorder::quenelist" title="SendOrder" module="Yaoli_Sendorder" sortOrder="20" parent="Yaoli_Sendorder::quenelist_head" action="sendorder/quenelist" resource="Yaoli_Sendorder::quenelist_head" />
+    </menu>
+</config>
