@@ -1,6 +1,6 @@
 {
     "name": "yaoli/sendorder",
-    "description": "yaoli",
+    "description": "Yaoli Plugin for Magento2",
     "require": {
         "php": "~5.6.5|7.0.2|7.0.4|~7.0.6",
         "magento/framework": "100.1.*",
@@ -9,7 +9,7 @@
 	    "magento/module-contact": "100.0.*"
     },
     "type": "magento2-module",
-    "version": "100.0.0",
+    "version": "1.0.0",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
