@@ -145,15 +145,25 @@ class Data extends AbstractHelper
     }
 
     /**
+     * get sendorder push amqpLink
+     * @return string
+     */
+    public function getSendorderPushLink()
+    {
+        return $this->scopeConfig->getValue('sendorder/connection/amqp_links');
+    }
+
+    /**
      * push data by phplibamqp
      */
     public function pushOrderdataByLib($_data)
     {
-        $_url = 'amqp://flkmvjaa:7x7ssCOMjJx6_BCuVyYVotu6H065nSgV@orangutan.rmq.cloudamqp.com/flkmvjaa';
+        $amqp = RabbitMQ::create($this->getSendorderQuenueName(), $this->getSendorderPushLink());
 
-        $amqp = RabbitMQ::create('M2AMQP', $_url);
-
-        $result = $amqp->publish($_data);
+        if (is_array($_data))
+            $result = $amqp->publish($_data);
+        else
+            $result = $amqp->publish(unserialize($_data));
 
         return $result;
     }

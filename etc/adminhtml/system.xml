@@ -35,6 +35,10 @@
                 <field id="quenue_name" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Quenue Name</label>
                 </field>
+
+                <field id="amqp_links" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>AMQP PushLink</label>
+                </field>
             </group>
 
             <group id="connection" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
