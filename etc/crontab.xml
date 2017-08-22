@@ -1,4 +1,5 @@
-<config>
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="yaoli_sendorder">
         <job name="order_sync_to_oa" instance="Yaoli\Sendorder\Cron\SyncOrderToAmqp" method="execute">
             <schedule>*/1 * * * *</schedule>
