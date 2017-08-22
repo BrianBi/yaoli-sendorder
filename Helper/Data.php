@@ -214,59 +214,77 @@ class Data extends AbstractHelper
         if (!$_order->getId()) return;
 
         $_payment = $_order->getPayment();
+        $_payinfo = $_payment->getAdditionalInformation();
 
         $_data = array();
 
-        $_data['web_id']   = $this->getSendorderWebId();
-        $_data['order_id'] = $_order->getIncrementId();
-        $_data['action']   = $_order->getStatus() == \Magento\Sales\Model\Order::STATE_COMPLETE ? 1 : 0;
-
-        if ($_order->getBusinessAccount())
-            $_data['pay_account'] = $_order->getBusinessAccount();
-        else
-            $_data['pay_account'] = '';
-
-        $_data['customer_email']  = $_order->getCustomerEmail();
-
+        /** Order base info */
+        $_data['web_id']       = $this->getSendorderWebId();
+        $_data['increment_id'] = $_order->getIncrementId();
+        $_data['ordertype']    = '';
+        $_data['action']       = $_order->getStatus() == \Magento\Sales\Model\Order::STATE_COMPLETE ? 1 : 0;
+        $_data['status']       = $_order->getStatus();
+        $_data['pay_account']  = isset($_payinfo['paypal_payer_email']) ? $_payinfo['paypal_payer_email'] : '';
         $_data['order_add_webid'] = $this->getSendorderWebId();
+        $_data['grand_total']     = $_order->getGrandTotal();
+        $_data['subtotal']        = $_order->getGrandTotal();
+        $_data['subtotal_incl_tax'] = $_order->getGrandTotal();
+        $_data['shipping_amount']   = 0;
+        $_data['order_currency_code'] = $_order->getOrderCurrencyCode();
+        $_data['lancin_fee_amount']      = '';
+        $_data['payment_percentage_fee'] = '';
+        $_data['express_fee_amount']     = '';
 
-        $_data['total_money'] = $_payment->getData('amount_paid');
-        $_data['currency']    = $_order->getOrderCurrencyCode();
+        $_data['Language'] = $this->storeManager->getStore()->getCode();
+        $_data['x_forwarded_for'] = null;
 
-        $_data['pay_method'] = $this->getOrderPaymentdSyncOaId($_order);
+        $_data['is_mobile'] = $this->isMobile();
+        $_data['buy_ip']    = $_order->getRemoteIp();
+        $_data['browser']   = $_SERVER['HTTP_USER_AGENT'];
+        $_data['http_referer'] = $this->_objectManager->get('Magento\Framework\Session\Storage')->getData('user_http_referer_log');
 
+        /** Order payment info */
+        $_data['payment']['method']  = $this->getOrderPaymentdSyncOaId($_order);
         /* @var $_data['transaction_id'] 根据不同支付方式获取 */
         if (!$_payment->getData('adyen_psp_reference'))
-            $_data['transaction_id'] = $_payment->getData('last_trans_id');
+            $_data['payment']['transaction_id'] = $_payment->getData('last_trans_id');
         else
-            $_data['transaction_id'] = $_payment->getData('adyen_psp_reference');
+            $_data['payment']['transaction_id'] = $_payment->getData('adyen_psp_reference');
 
-        if (!$_data['transaction_id'])
+        if (!$_data['payment']['transaction_id'])
         {
             $_orderComments = $this->checkTransactionId($_order);
             if (is_array($_orderComments))
             {
-                $_data['pay_method']     = $_orderComments['pay_method'];
-                $_data['total_money']    = $_orderComments['total_money'];
-                $_data['transaction_id'] = $_orderComments['transaction_id'];
-                $_data['currency']       = $_orderComments['currency'];
+                $_data['payment']['method']     = $_orderComments['method'];
+                $_data['payment']['transaction_id'] = $_orderComments['transaction_id'];
             }
         }
 
-        $_data['Language'] = $this->storeManager->getStore()->getCode();
+        $_data['payment']['additional_data']        = '';
+        $_data['payment']['additional_information'] = $_payinfo;
+        $_data['payment']['paypal_payer_email']     = isset($_payinfo['paypal_payer_email']) ? $_payinfo['paypal_payer_email'] : '';
 
-        $_data['telephone'] = $this->getCustomerInfo($_order)['telephone'];
+        /** @var Order Discount Info */
+        $_data['discount']['coupon_code'] = $_order->getCouponCode();
+        $_data['discount']['discount_description']   = $_order->getDiscountDescription();
+        $_data['discount']['discount_amount']        = $_order->getDiscountAmount();
+        $_data['discount']['reward_currency_amount'] = null;
 
-        $_data['order_add_webid'] = $this->getSendorderWebId();
+        /** @var Order Customer Info */
+        $_customerInfo = $this->getCustomerInfo($_order);
+        $_data['customer']['Name'] = $_order->getCustomerFirstname() . ' ' . $_order->getCustomerLastname();
+        $_data['customer']['shipping_address'] = $_customerInfo['Address'];
+        $_data['customer']['billing_address']  = $_customerInfo['Address'];
+        $_data['customer']['telephone'] = $_customerInfo['telephone'];
+        $_data['customer']['Country']   = $_customerInfo['Country'];
+        $_data['customer']['City']      = $_customerInfo['City'];
+        $_data['customer']['Email']     = $_order->getCustomerEmail();
 
-        /* If Order Form Mudles */
-        //$orderFromData = Mage::helper('orderfrom')->getOrderFromInfo($order->getId());
-        $_data['is_mobile'] = '';
-        $_data['buy_ip']    = $_order->getRemoteIp();
-        $_data['browser']   = '';
-        $_data['http_referer'] = $this->_objectManager->get('Magento\Framework\Session\Storage')->getData('user_http_referer_log');
+        /** @var Order Items */
+        $_data['OrderArray'] = $this->getOrderAllItems($_order);
 
-        return array_merge($_data, $this->getOrderAllItems($_order));
+        return $_data;
     }
 
     /**
@@ -276,48 +294,32 @@ class Data extends AbstractHelper
      */
     protected function getOrderAllItems($_order)
     {
-        $_data       = array();
         $_orderItmes = array();
 
         foreach ($_order->getAllItems() as $_items)
         {
+            $_product = $this->_objectManager->create('Magento\Catalog\Model\ProductRepository')->getById($_items->getProductId());
+
             $_orderItmes[] = array(
-                array(
-                    'Product' => $_items->getName(),
-                    'Name'    => $_items->getProductId()
-                ),
-                'CreatedAt' => $_order->getCreatedAt(),
-                'PayTime'   => $_order->getUpdatedAt(),
-                'FinishTime'=> $_order->getUpdatedAt(),
-                'Status'    => $_order->getStatus(),
-                'TotalMoney'=> $_items->getBaseRowTotal(),
-                'Quantity'  => $_items->getQtyOrdered(),
+                'type' => $_items->getProductType(),
+                'sku'  => $_items->getSku(),
+                'product_name'=> $_items->getName(),
+                'soft_sort'   => $_product->getSoftSort(),
+                'softsort_gd' => null,
+                'productbundlesku'=> $_product->getProductbundlesku(),
+                'qty_ordered'     => $_items->getQtyOrdered(),
+                'price_incl_tax'  => $_product->getSpecialPrice() ? $_product->getSpecialPrice() : $_items->getPriceInclTax(),
+                'row_total_incl_tax' => null,
+                'product_options'    => $_items->getProductOptions(),
+                'stock_info' => array(
+                        'qty'        => null,
+                        'stock_code' => null,
+                        'stock_name' => null
+                    )
             );
         }
 
-        $_customer = $this->getCustomerInfo($_order);
-
-        $_data = array(
-            'OrderNo' => $_order->getIncrementId(),
-            'Customer'=> array(
-                'Name'    => $_customer['Name'],
-                'Address' => $_customer['Address'],
-                'City'    => $_customer['City'],
-                'Country' => $_customer['Country'],
-                'Phone'   => $_customer['telephone'],
-                'PostCode'=> $_customer['PostCode'],
-                'BuyIP'   => $_customer['BuyIP'],
-                'Email'   => $_customer['Email']
-            ),
-            'WebId'         => $this->getSendorderWebId(),
-            'Language'      => $this->storeManager->getStore()->getCode(),
-            'TransactionId' => $_order->getPayment()->getLastTransId(),
-            'PayMode'       => $this->getOrderPaymentdSyncOaId($_order),
-            'Currency'      => $_order->getOrderCurrencyCode(),
-            'OrderArray'    => $_orderItmes
-        );
-
-        return $_data;
+        return $_orderItmes;
     }
 
     /**
@@ -416,6 +418,20 @@ class Data extends AbstractHelper
         }
 
         return false;
+    }
+
+    /**
+     * Check Is Mobile
+     * @return bool 
+     */
+    public function isMobile() {
+        if ($_SERVER && isset ($_SERVER['HTTP_USER_AGENT'])){
+            $userAgent = $_SERVER['HTTP_USER_AGENT'];
+            if(preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i',$userAgent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i',substr($userAgent,0,4))) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     /**
