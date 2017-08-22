@@ -41,18 +41,26 @@ class SyncOrderToOaObserver implements ObserverInterface
 
         $queneCollection = $this->_objectManager->create('Yaoli\Sendorder\Model\Quenelist');
 
-        $_queneModel = $queneCollection->load(['entity_id' => $_order->getId()]);
+        $_queneModels = $queneCollection->getCollection()->addFieldToFilter('increment_id', $_order->getIncrementId());
 
-        $_sendData   = serialize($this->_sendorderHelper->encapsulationOrderData($_order));
+        $_sendData    = serialize($this->_sendorderHelper->encapsulationOrderData($_order));
 
-        if ($_queneModel->getId())
+        if (count($_queneModels) > 0)
         {
-            try {
-                $_queneModel->setOrderStatus($_order->getStatus());
-                $_queneModel->setSendData($_sendData);
-                $_queneModel->save();
-            } catch (\Exception $e) {
-                $this->logger->error($e->getMessage());
+            foreach ($_queneModels as $_queneModel)
+            {
+                if ($_queneModel->getId())
+                {
+                    try {
+                        $_queneModel->setOrderStatus($_order->getStatus());
+                        $_queneModel->setSendData($_sendData);
+                        $_queneModel->save();
+                    } catch (\Exception $e) {
+                        $this->logger->error($e->getMessage());
+                    }
+                } else {
+                    continue;
+                }
             }
 
             return $this;
