@@ -250,9 +250,12 @@ class Data extends AbstractHelper
         $_data['payment']['method']  = $_payment->getMethod();
         /* @var $_data['transaction_id'] 根据不同支付方式获取 */
         if (!$_payment->getData('adyen_psp_reference'))
+        {
             $_data['payment']['transaction_id'] = $_payment->getData('last_trans_id');
-        else
+        } else {
             $_data['payment']['transaction_id'] = $_payment->getData('adyen_psp_reference');
+            $_data['payment']['adyen_psp_reference'] = $_payment->getData('adyen_psp_reference');
+        }
 
         if (!$_data['payment']['transaction_id'])
         {
