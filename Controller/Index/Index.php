@@ -35,7 +35,8 @@ class Index extends Action
                             $quene->setSyncedAt(time());
                             $quene->save();
                         } catch (\Exception $e) {
-                            $this->logger->critical($e."Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
+                            //$this->logger->critical($e."Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
+                            throw new Exception("Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
                         }
                     }
                 }
@@ -59,7 +60,7 @@ class Index extends Action
                                 try {
                                     $quene->delete();
                                 } catch (\Exception $e) {
-                                    $this->logger->critical($e."Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
+                                    throw new Exception("Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
                                 }
                             }
                         }
