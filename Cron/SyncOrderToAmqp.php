@@ -10,24 +10,11 @@ namespace Yaoli\Sendorder\Cron;
 class SyncOrderToAmqp
 {
     /**
-     * @var Yaoli\Sendorder\Model\ResourceModel\CollectionFactory
-     */
-    private $queneCollectionFactory;
-
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    private $logger;
-
-    /**
      * construct
      */
-    public function __construct(
-        \Yaoli\Sendorder\Model\ResourceModel\CollectionFactory $queneCollectionFactory,
-        \Psr\Log\LoggerInterface $logger
-    ) {
-        $this->queneCollectionFactory = $queneCollectionFactory;
-        $this->logger = $logger;
+    public function __construct()
+    {
+
     }
 
     /**
@@ -35,22 +22,21 @@ class SyncOrderToAmqp
      */
     public function execute()
     {
-        $this->logger->critical("Cron Job Run!!!");
-        $collection = $this->queneCollectionFactory->create();
-        $collection->addFilter('send_status', 0);
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 
-        if (count($collection) > 0)
+        $queneCollection = $objectManager->create('Yaoli\Sendorder\Model\Quenelist');
+
+        $collection = $queneCollection->getCollection()->addFieldToFilter('send_status', 0);
+
+        foreach ($collection as $quene)
         {
-            foreach ($collection as $quene)
-            {
-                try {
-                    $this->objectManager->get('\Yaoli\Sendorder\Helper\Data')->pushOrderdataByLib(unserialize($quene->getSendData()));
-                    $quene->setSendStatus(1);
-                    $quene->setSyncedAt(time());
-                    $quene->save();
-                } catch (\Exception $e) {
-                    $this->logger->critical($e."Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
-                }
+            try {
+                $objectManager->get('\Yaoli\Sendorder\Helper\Data')->pushOrderdataByLib(unserialize($quene->getSendData()));
+                $quene->setSendStatus(1);
+                $quene->setSyncedAt(time());
+                $quene->save();
+            } catch (\Exception $e) {
+                throw new Exception("Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
             }
         }
 
