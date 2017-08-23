@@ -309,7 +309,7 @@ class Data extends AbstractHelper
                 'productbundlesku'=> $_product->getProductbundlesku(),
                 'qty_ordered'     => $_items->getQtyOrdered(),
                 'price_incl_tax'  => $_product->getSpecialPrice() ? $_product->getSpecialPrice() : $_items->getPriceInclTax(),
-                'row_total_incl_tax' => null,
+                'row_total_incl_tax' => $_items->getRowTotalInclTax(),
                 'product_options'    => $_items->getProductOptions(),
                 'stock_info' => array(
                         'qty'        => null,
