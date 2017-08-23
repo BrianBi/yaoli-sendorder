@@ -17,58 +17,59 @@ class Index extends Action
 
     public function execute()
     {
-        echo 'yes';
-        /*$_model = $this->_objectManager->create('Yaoli\Sendorder\Model\Quenelist')->load(['entity_id' => 1]);
-        echo $_model->getId();*/
+        $params = $this->getRequest()->getParams();
 
-        /*$_order = $this->_objectManager->create('Magento\Sales\Model\Order')->load(3);
-        $_sendData   = serialize(
-            [
-                'entity_id' => $_order->getId(),
-                'increment_id' => $_order->getIncrementId(),
-                'order_status' => $_order->getStatus(),
-                'created_at'   => new \DateTime()
-            ]
-        );
-
-        $_model = $this->_objectManager->create('Yaoli\Sendorder\Model\Quenelist');
-        $_model->setEntityId($_order->getId());
-        $_model->setIncrementId($_order->getIncrementId());
-        $_model->setOrderStatus($_order->getStatus());
-        $_model->setSendStatus(0);
-        $_model->setSendData($_sendData);*/
-        //$_model->setCreatedAt();
-        /*$_model->save();
-
-        $this->getResponse()->appendBody('Yaoli Sendorder');*/
-
-        /*$_quenelist = $this->_objectManager->create('Yaoli\Sendorder\Model\Quenelist')
-            ->getCollection()
-            ->addFieldToFilter('send_status', 0);
-
-        $_data = array();
-
-        foreach ($_quenelist as $quene)
+        if (isset($params['action']))
         {
-            $_data['order_data'] = $quene->getSendData();
-            $quene->setSendStatus(1);
-            $quene->setSyncAt(time());
-            $quene->save();
+            if ($params['action'] == 'run')
+            {
+                $_quenelist = $this->_objectManager->create('Yaoli\Sendorder\Model\Quenelist')->getCollection()->addFieldToFilter('send_status', 0);
+
+                if (count($_quenelist) > 0)
+                {
+                    foreach ($_quenelist as $quene)
+                    {
+                        try {
+                            $this->objectManager->get('\Yaoli\Sendorder\Helper\Data')->pushOrderdataByLib(unserialize($quene->getSendData()));
+                            $quene->setSendStatus(1);
+                            $quene->setSyncedAt(time());
+                            $quene->save();
+                        } catch (\Exception $e) {
+                            $this->logger->critical($e."Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
+                        }
+                    }
+                }
+
+                exit('Completed...');
+            } else if ($params['action'] == 'delete') {
+                if (isset($params['items']))
+                {
+                    if ($params['items'] !== 'all')
+                    {
+                        $_id = (int) $params['items'];
+                        $_model = $this->_objectManager->create('Yaoli\Sendorder\Model\Quenelist')->load($_id);
+                        $_model->delete();
+                    } else if ($params['items'] == 'all') {
+                        $_quenelist = $this->_objectManager->create('Yaoli\Sendorder\Model\Quenelist')->getCollection()->addFieldToFilter('send_status', 1);
+
+                        if (count($_quenelist) > 0)
+                        {
+                            foreach ($_quenelist as $quene)
+                            {
+                                try {
+                                    $quene->delete();
+                                } catch (\Exception $e) {
+                                    $this->logger->critical($e."Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
+                                }
+                            }
+                        }
+                    }
+
+                    exit('Delete Completed...');
+                }
+            }
         }
 
-        $this->getHelpers()->pushOrderData($_data);*/
-        //var_dump($this->_objectManager->get('\Yaoli\Sendorder\Helper\Data')->getSendorderWebId());
-        //echo $this->_SendorderHelper->getSendorderEnable();
-
-        /*$_model = $this->_objectManager->create('Yaoli\Sendorder\Model\Quenelist')->load(['entity_id' => 5]);
-        echo $_model->getId();
-
-        var_dump($_model->getId());*/
-        /*$_order = $this->_objectManager->create('Magento\Sales\Model\Order')->load(3);
-
-        $helper = $this->_objectManager->get('\Yaoli\Sendorder\Helper\Data');
-        $data   = $helper->encapsulationOrderData($_order);
-
-        $helper->pushOrderdataByLib($data);*/
+        $this->_redirect('/');
     }
 }

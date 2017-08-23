@@ -46,7 +46,7 @@ class SyncOrderToAmqp
                 try {
                     $this->objectManager->get('\Yaoli\Sendorder\Helper\Data')->pushOrderdataByLib(unserialize($quene->getSendData()));
                     $quene->setSendStatus(1);
-                    $quene->setSyncAt(time());
+                    $quene->setSyncedAt(time());
                     $quene->save();
                 } catch (\Exception $e) {
                     $this->logger->critical($e."Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");

@@ -150,7 +150,7 @@ class Data extends AbstractHelper
      */
     public function getSendorderPushLink()
     {
-        return $this->scopeConfig->getValue('sendorder/connection/amqp_links');
+        return $this->scopeConfig->getValue('sendorder/general/amqp_links');
     }
 
     /**
