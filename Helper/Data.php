@@ -225,7 +225,7 @@ class Data extends AbstractHelper
         $_data['action']       = $_order->getStatus() == \Magento\Sales\Model\Order::STATE_COMPLETE ? 1 : 0;
         $_data['status']       = $_order->getStatus();
         $_data['pay_account']  = isset($_payinfo['paypal_payer_email']) ? $_payinfo['paypal_payer_email'] : '';
-        $_data['order_add_webid'] = $this->getSendorderWebId();
+        $_data['order_add_webid'] = 0;/*$this->getSendorderWebId()*/
         $_data['grand_total']     = $_order->getGrandTotal();
         $_data['subtotal']        = $_order->getGrandTotal();
         $_data['subtotal_incl_tax'] = $_order->getGrandTotal();
