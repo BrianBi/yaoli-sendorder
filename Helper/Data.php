@@ -223,6 +223,9 @@ class Data extends AbstractHelper
         $_data['increment_id'] = $_order->getIncrementId();
         $_data['ordertype']    = '';
         $_data['action']       = $_order->getStatus() == \Magento\Sales\Model\Order::STATE_COMPLETE ? 1 : 0;
+
+        if ($_data['action'] == 1) $_data['pay_method'] = $this->getOrderPaymentdSyncOaId($_order);
+
         $_data['status']       = $_order->getStatus();
         $_data['pay_account']  = isset($_payinfo['paypal_payer_email']) ? $_payinfo['paypal_payer_email'] : '';
         $_data['order_add_webid'] = 0;/*$this->getSendorderWebId()*/
@@ -244,7 +247,7 @@ class Data extends AbstractHelper
         $_data['http_referer'] = $this->_objectManager->get('Magento\Framework\Session\Storage')->getData('user_http_referer_log');
 
         /** Order payment info */
-        $_data['payment']['method']  = $this->getOrderPaymentdSyncOaId($_order);
+        $_data['payment']['method']  = $_payment->getMethod();
         /* @var $_data['transaction_id'] 根据不同支付方式获取 */
         if (!$_payment->getData('adyen_psp_reference'))
             $_data['payment']['transaction_id'] = $_payment->getData('last_trans_id');
@@ -256,12 +259,13 @@ class Data extends AbstractHelper
             $_orderComments = $this->checkTransactionId($_order);
             if (is_array($_orderComments))
             {
-                $_data['payment']['method']     = $_orderComments['method'];
+                $_data['payment']['method'] = $_orderComments['method'];
                 $_data['payment']['transaction_id'] = $_orderComments['transaction_id'];
             }
         }
 
         $_data['payment']['additional_data']        = '';
+        $_data['payment']['last_trans_id']          = $_data['payment']['transaction_id'];
         $_data['payment']['additional_information'] = $_payinfo;
         $_data['payment']['paypal_payer_email']     = isset($_payinfo['paypal_payer_email']) ? $_payinfo['paypal_payer_email'] : '';
 
@@ -274,11 +278,12 @@ class Data extends AbstractHelper
         /** @var Order Customer Info */
         $_customerInfo = $this->getCustomerInfo($_order);
         $_data['customer']['Name'] = $_order->getCustomerFirstname() . ' ' . $_order->getCustomerLastname();
-        $_data['customer']['shipping_address'] = $_order->getShippingAddress();
-        $_data['customer']['billing_address']  = $_order->getBillingAddress();
+        $_data['customer']['shipping_address'] = $this->getAddrress($_order->getShippingAddress());;
+        $_data['customer']['billing_address']  = $this->getAddrress($_order->getBillingAddress());
         $_data['customer']['telephone'] = $_customerInfo['telephone'];
         $_data['customer']['Country']   = $_customerInfo['Country'];
         $_data['customer']['City']      = $_customerInfo['City'];
+        $_data['customer']['Region']    = $_customerInfo['Region'];
         $_data['customer']['Email']     = $_order->getCustomerEmail();
 
         /** @var Order Items */
@@ -311,6 +316,7 @@ class Data extends AbstractHelper
                 'price_incl_tax'  => $_product->getSpecialPrice() ? $_product->getSpecialPrice() : $_items->getPriceInclTax(),
                 'row_total_incl_tax' => $_items->getRowTotalInclTax(),
                 'product_options'    => $_items->getProductOptions(),
+                'discount_amount'    => $_items->getDiscountAmount(),
                 'stock_info' => array(
                         'qty'        => null,
                         'stock_code' => null,
@@ -329,17 +335,20 @@ class Data extends AbstractHelper
      */
     public function getCustomerInfo($_order)
     {
-        $_orderBilling = $_order->getBillingAddress();
+        return $this->getAddrress($_order->getBillingAddress());
+    }
+
+    public function getAddrress($_orderBilling)
+    {
 
         return array(
-            'telephone' => $_orderBilling->getTelephone(),
-            'Name'      => $_orderBilling->getFirstname() .' '.$_orderBilling->getLastname(),
-            'City'      => $_orderBilling->getCity(),
-            'Country'   => $_orderBilling->getCountryId(),
-            'PostCode'  => $_orderBilling->getPostcode(),
-            'BuyIP'     => $_order->getRemoteIp(),
-            'Email'     => $_order->getCustomerEmail(),
-            'Address'   => $_orderBilling->getStreet(),
+            'telephone' => $_orderBilling ? $_orderBilling->getTelephone() : '',
+            'Name'      => $_orderBilling ? $_orderBilling->getFirstname() .' '.$_orderBilling->getLastname() : '',
+            'City'      => $_orderBilling ? $_orderBilling->getCity() : '',
+            'Country'   => $_orderBilling ? $_orderBilling->getCountryId() : '',
+            'Region'    => $_orderBilling ? $_orderBilling->getRegion() : '',
+            'PostCode'  => $_orderBilling ? $_orderBilling->getPostcode() : '',
+            'Address'   => $_orderBilling ? $_orderBilling->getStreet() : '',
         );
     }
 
