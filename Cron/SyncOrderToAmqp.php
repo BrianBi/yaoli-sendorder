@@ -9,13 +9,25 @@ namespace Yaoli\Sendorder\Cron;
 
 class SyncOrderToAmqp
 {
-    protected $objectManager;
+    /**
+     * @var Yaoli\Sendorder\Model\ResourceModel\CollectionFactory
+     */
+    private $queneCollectionFactory;
+
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $logger;
+
     /**
      * construct
      */
-    public function __construct(\Magento\Framework\ObjectManagerInterface $objectManager)
-    {
-        $this->objectManager = $objectManager;
+    public function __construct(
+        \Yaoli\Sendorder\Model\ResourceModel\CollectionFactory $queneCollectionFactory,
+        \Psr\Log\LoggerInterface $logger
+    ) {
+        $this->queneCollectionFactory = $queneCollectionFactory;
+        $this->logger = $logger;
     }
 
     /**
@@ -23,22 +35,22 @@ class SyncOrderToAmqp
      */
     public function execute()
     {
-        $_quenelist = $this->objectManager->create('Yaoli\Sendorder\Model\Quenelist')
-            ->getCollection()
-            ->addFieldToFilter('send_status', 0);
+        $this->logger->critical("Cron Job Run!!!");
+        $collection = $this->queneCollectionFactory->create();
+        $collection->addFilter('send_status', 0);
 
-        $_data = array();
-
-        foreach ($_quenelist as $quene)
+        foreach ($collection as $quene)
         {
             try {
-                $this->objectManager->get('\Yaoli\Sendorder\Helper\Data')->pushOrderData(unserialize($quene->getSendData()));
+                $this->objectManager->get('\Yaoli\Sendorder\Helper\Data')->pushOrderdataByLib(unserialize($quene->getSendData()));
                 $quene->setSendStatus(1);
                 $quene->setSyncAt(time());
                 $quene->save();
             } catch (\Exception $e) {
-                throw new \Exception("Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
+                $this->logger->critical($e."Cannot Send Data to the RabbitMQ Exception {$quene->getIncrementId}");
             }
         }
+
+        return $this;
     }
 }
