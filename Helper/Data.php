@@ -274,8 +274,8 @@ class Data extends AbstractHelper
         /** @var Order Customer Info */
         $_customerInfo = $this->getCustomerInfo($_order);
         $_data['customer']['Name'] = $_order->getCustomerFirstname() . ' ' . $_order->getCustomerLastname();
-        $_data['customer']['shipping_address'] = $_customerInfo['Address'];
-        $_data['customer']['billing_address']  = $_customerInfo['Address'];
+        $_data['customer']['shipping_address'] = $_order->getShippingAddress();
+        $_data['customer']['billing_address']  = $_order->getBillingAddress();
         $_data['customer']['telephone'] = $_customerInfo['telephone'];
         $_data['customer']['Country']   = $_customerInfo['Country'];
         $_data['customer']['City']      = $_customerInfo['City'];
