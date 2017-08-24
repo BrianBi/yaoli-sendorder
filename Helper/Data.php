@@ -316,7 +316,7 @@ class Data extends AbstractHelper
                 'softsort_gd' => null,
                 'productbundlesku'=> $_product->getProductbundlesku(),
                 'qty_ordered'     => $_items->getQtyOrdered(),
-                'price_incl_tax'  => $_product->getSpecialPrice() ? $_product->getSpecialPrice() : $_items->getPriceInclTax(),
+                'price_incl_tax'  => $_items->getPriceInclTax(),
                 'row_total_incl_tax' => $_items->getRowTotalInclTax(),
                 'product_options'    => $_items->getProductOptions(),
                 'discount_amount'    => $_items->getDiscountAmount(),
