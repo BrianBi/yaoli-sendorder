@@ -230,8 +230,8 @@ class Data extends AbstractHelper
         $_data['pay_account']  = isset($_payinfo['paypal_payer_email']) ? $_payinfo['paypal_payer_email'] : '';
         $_data['order_add_webid'] = 0;/*$this->getSendorderWebId()*/
         $_data['grand_total']     = $_order->getGrandTotal();
-        $_data['subtotal']        = $_order->getGrandTotal();
-        $_data['subtotal_incl_tax'] = $_order->getGrandTotal();
+        $_data['subtotal']        = $_order->getSubtotal();
+        $_data['subtotal_incl_tax'] = $_order->getSubtotal();
         $_data['shipping_amount']   = 0;
         $_data['order_currency_code'] = $_order->getOrderCurrencyCode();
         $_data['lancin_fee_amount']      = '';
