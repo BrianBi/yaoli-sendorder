@@ -13,4 +13,8 @@
     <event name="sales_order_state_change_before">
         <observer name="sendorder_sales_order_state_change_before" instance="Yaoli\Sendorder\Observer\SyncOrderToOaObserver"/>
     </event>
+
+    <event name="controller_action_predispatch">
+        <observer name="sendorder_controller_action_predispatch" instance="Yaoli\Sendorder\Observer\LogHttpRefererObserver"/>
+    </event>
 </config>

@@ -244,7 +244,17 @@ class Data extends AbstractHelper
         $_data['is_mobile'] = $this->isMobile();
         $_data['buy_ip']    = $_order->getRemoteIp();
         $_data['browser']   = $_SERVER['HTTP_USER_AGENT'];
-        $_data['http_referer'] = $this->_objectManager->get('Magento\Framework\Session\Storage')->getData('user_http_referer_log');
+        //$_data['http_referer'] = $this->_objectManager->get('Magento\Framework\Session\Storage')->getData('user_http_referer_log');
+
+        $session = $this->_objectManager->get('Magento\Framework\Session\Storage');
+        
+        if ($session->getHttpRefferLogFlags())
+        {
+            $_data['http_referer'] = $session->getHttpRefferLogFlags();
+            $session->unsHttpRefferLogFlags();
+        } else {
+            $_data['http_referer'] = $this->storeManager->getStore()->getBaseUrl();
+        }
 
         /** Order payment info */
         $_data['payment']['method']  = $_payment->getMethod();
