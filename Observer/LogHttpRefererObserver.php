@@ -20,8 +20,13 @@ class LogHttpRefererObserver implements ObserverInterface
     {
     	$session = $this->_objectManager->get('Magento\Framework\Session\Storage');
 
-    	if (!$session->getHttpRefferLogFlags() && isset($_SERVER['HTTP_REFERER']))
-    		$session->setHttpRefferLogFlags($_SERVER['HTTP_REFERER']);
+    	/*if (!$session->getHttpRefferLogFlags() && isset($_SERVER['HTTP_REFERER']))
+    		$session->setHttpRefferLogFlags($_SERVER['HTTP_REFERER']);*/
+        if ((!$session->getHttpRefferLogFlags() || !isset($_COOKIE["http_reffer_log_flags"])) && isset($_SERVER['HTTP_REFERER']))
+        {
+            $session->setHttpRefferLogFlags($_SERVER['HTTP_REFERER']);
+            setcookie("http_reffer_log_flags", $_SERVER['HTTP_REFERER']);
+        }
     	
     	return $this;
     }

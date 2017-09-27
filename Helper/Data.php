@@ -258,10 +258,11 @@ class Data extends AbstractHelper
 
         $session = $this->_objectManager->get('Magento\Framework\Session\Storage');
         
-        if ($session->getHttpRefferLogFlags())
+        if ($session->getHttpRefferLogFlags() || isset($_COOKIE["http_reffer_log_flags"]))
         {
-            $_data['http_referer'] = $session->getHttpRefferLogFlags();
+            $_data['http_referer'] = $session->getHttpRefferLogFlags() && $session->getHttpRefferLogFlags() !=='' ? $session->getHttpRefferLogFlags() : $_COOKIE["http_reffer_log_flags"];
             $session->unsHttpRefferLogFlags();
+            setcookie('http_reffer_log_flags');
         } else {
             $_data['http_referer'] = $this->storeManager->getStore()->getBaseUrl();
         }
