@@ -222,7 +222,17 @@ class Data extends AbstractHelper
         $_data['web_id']       = $this->getSendorderWebId();
         $_data['increment_id'] = $_order->getIncrementId();
         $_data['ordertype']    = '';
-        $_data['action']       = $_order->getStatus() == \Magento\Sales\Model\Order::STATE_COMPLETE ? 1 : 0;
+
+        // $_data['action']       = $_order->getStatus() == \Magento\Sales\Model\Order::STATE_COMPLETE ? 1 : 0;
+
+        if ($_order->getStatus() == \Magento\Sales\Model\Order::STATE_PROCESSING && $_payment->getMethod() == 'free')
+        {
+            $_data['action'] = 1;
+        } elseif ($_order->getStatus() == \Magento\Sales\Model\Order::STATE_COMPLETE) {
+            $_data['action'] = 1;
+        } else {
+            $_data['action'] = 0;
+        }
 
         if ($_data['action'] == 1) $_data['pay_method'] = $this->getOrderPaymentdSyncOaId($_order);
 
