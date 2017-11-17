@@ -235,8 +235,13 @@ class Data extends AbstractHelper
         }
 
         if ($_data['action'] == 1) $_data['pay_method'] = $this->getOrderPaymentdSyncOaId($_order);
-
-        $_data['status']       = $_order->getStatus();
+        if ($_order->getStatus() == \Magento\Sales\Model\Order::STATE_PROCESSING && $_payment->getMethod() == 'free')
+		{
+			$_data['status']       = \Magento\Sales\Model\Order::STATE_COMPLETE;
+		}else{
+			$_data['status']       = $_order->getStatus();
+		}
+        //$_data['status']       = $_order->getStatus();
         $_data['pay_account']  = isset($_payinfo['paypal_payer_email']) ? $_payinfo['paypal_payer_email'] : '';
         $_data['order_add_webid'] = 0;/*$this->getSendorderWebId()*/
         $_data['grand_total']     = $_order->getOrderCurrencyCode() == 'TWD' ? intval($_order->getGrandTotal()) : $_order->getGrandTotal();
@@ -253,7 +258,7 @@ class Data extends AbstractHelper
 
         $_data['is_mobile'] = $this->isMobile();
         $_data['buy_ip']    = $_order->getRemoteIp();
-        $_data['browser']   = $_SERVER['HTTP_USER_AGENT'];
+        $_data['browser']   = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
         //$_data['http_referer'] = $this->_objectManager->get('Magento\Framework\Session\Storage')->getData('user_http_referer_log');
 
         $session = $this->_objectManager->get('Magento\Framework\Session\Storage');
@@ -496,20 +501,20 @@ class Data extends AbstractHelper
             "moneybookers_sft" =>8,
             "moneybookers_ent" =>8,
             "moneybookers_idl" =>8,
-            "paypal_standard" =>46,
-            "payflow_advanced" =>46,
-            "payflow_link" =>46,
-            "paypal_billing_agreement" =>46,
-            "paypal_express" =>46,
-            "paypaluk_express" =>46,
-            "paypal_direct" =>46,
-            "paypaluk_direct" =>46,
-            "verisign" =>46,
-            "hosted_pro" =>46,
-            "paypal_express_bml" =>46,
-            "paypaluk_express_bml" =>46,
-            "pbridge_paypal_direct" =>46,
-            "pbridge_paypaluk_direct" =>46,
+            "paypal_standard" =>48,
+            "payflow_advanced" =>48,
+            "payflow_link" =>48,
+            "paypal_billing_agreement" =>48,
+            "paypal_express" =>48,
+            "paypaluk_express" =>48,
+            "paypal_direct" =>48,
+            "paypaluk_direct" =>48,
+            "verisign" =>48,
+            "hosted_pro" =>48,
+            "paypal_express_bml" =>48,
+            "paypaluk_express_bml" =>48,
+            "pbridge_paypal_direct" =>48,
+            "pbridge_paypaluk_direct" =>48,
             "paysafecard" =>3,
             "globalpay-1" =>21,
             "globalpay-2" =>22,
@@ -603,7 +608,7 @@ class Data extends AbstractHelper
             "alipay_payment" =>29,
             "customercredit" =>12,
             "barzahlen" =>26,
-            "pp-lc" =>28,
+            "pp-lc" =>48,
             "adyen_hpp_giropay"=>35,
             "adyen_hpp_paysafecard"=>32,
             "adyen_hpp_bankTransfer_DE"=>36,
@@ -614,7 +619,8 @@ class Data extends AbstractHelper
             "bitpay" => 31,
             "adyen_hpp_mc"=>40,
             "adyen_hpp_amex"=>41,
-            "adyen_hpp_visa"=>42
+            "adyen_hpp_visa"=>42,
+			"adyen_hpp"=>40
         );
     }
 }

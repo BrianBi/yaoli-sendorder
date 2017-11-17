@@ -54,6 +54,7 @@ class SyncOrderToOaObserver implements ObserverInterface
                     try {
                         $_queneModel->setOrderStatus($_order->getStatus());
                         $_queneModel->setSendData($_sendData);
+						$_queneModel->setSendStatus(0);
                         $_queneModel->save();
                     } catch (\Exception $e) {
                         $this->logger->error($e->getMessage());
