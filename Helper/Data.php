@@ -43,7 +43,7 @@ class Data extends AbstractHelper
      */
     public function getSendorderWebId()
     {
-        return $this->scopeConfig->getValue('sendorder/general/webid');
+        return $this->scopeConfig->getValue('sendorder/general/webid', \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $this->storeManager->getStore()->getStoreId());
     }
 
     /**
@@ -398,6 +398,10 @@ class Data extends AbstractHelper
         } elseif ($_payCode == 'globalpay' && isset($_payInfo['globalpay_method_id']))
         {
             return $this->_getPayCode('globalpay-' . $_payInfo['globalpay_method_id']);
+        } elseif ($_payCode == 'paypal_express' && (int)$this->getSendorderWebId() == 113) {
+            return $this->_getPayCode('pp-ld');
+        } elseif ($_payCode == 'paypal_express' && (int)$this->getSendorderWebId() == 112) {
+            return $this->_getPayCode('pp-rh');
         } else {
             return $this->_getPayCode($_payCode);
         }
@@ -620,7 +624,9 @@ class Data extends AbstractHelper
             "adyen_hpp_mc"=>40,
             "adyen_hpp_amex"=>41,
             "adyen_hpp_visa"=>42,
-			"adyen_hpp"=>40
+			"adyen_hpp"=>40,
+            "pp-ld"   =>49,
+            "pp-rh"    =>50
         );
     }
 }

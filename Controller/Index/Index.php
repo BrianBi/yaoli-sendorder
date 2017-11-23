@@ -30,7 +30,7 @@ class Index extends Action
                     foreach ($_quenelist as $quene)
                     {
                         try {
-                            $this->objectManager->get('\Yaoli\Sendorder\Helper\Data')->pushOrderdataByLib(unserialize($quene->getSendData()));
+                            $this->_objectManager->create('\Yaoli\Sendorder\Helper\Data')->pushOrderdataByLib(unserialize($quene->getSendData()));
                             $quene->setSendStatus(1);
                             $quene->setSyncedAt(time());
                             $quene->save();
