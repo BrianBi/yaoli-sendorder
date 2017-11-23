@@ -374,7 +374,7 @@ class Data extends AbstractHelper
             'telephone' => $_orderBilling ? $_orderBilling->getTelephone() : '',
             'Name'      => $_orderBilling ? $_orderBilling->getFirstname() .' '.$_orderBilling->getLastname() : '',
             'City'      => $_orderBilling ? $_orderBilling->getCity() : '',
-            'Country'   => $_orderBilling ? $_orderBilling->getCountryId() : '',
+            'Country'   => $_orderBilling ? $_orderBilling->getCountryId() : 'US',
             'Region'    => $_orderBilling ? $_orderBilling->getRegion() : '',
             'PostCode'  => $_orderBilling ? $_orderBilling->getPostcode() : '',
             'Address'   => $_orderBilling ? $_orderBilling->getStreet() : '',
@@ -626,7 +626,7 @@ class Data extends AbstractHelper
             "adyen_hpp_visa"=>42,
 			"adyen_hpp"=>40,
             "pp-ld"   =>49,
-            "pp-rh"    =>50
+            "pp-rh"   =>50,
         );
     }
 }
